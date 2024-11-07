@@ -283,8 +283,8 @@ select 100 + '200';
 -- select * from buy inner join member on buy.mem_id = member.mem_id where buy.mem_id='GRL';
 select * from buy
 	inner join member
-    on buy.mem_id = member.mem_id;
-
+    on buy.mem_id = member.mem_id
+where buy.mem_id = 'GRL';
 -- JOIN 은 어떤 속성을 선택할 것인지 앞에 테이블. 을 붙여 명확히 해주는 것이 좋다.
 select buy.mem_id, mem_name, prod_name, addr, concat(phone1, phone2) '연락처'
 	from buy
@@ -406,6 +406,7 @@ select M.mem_id, M.mem_name, sum(price*amount) '총구매액',
 	group by M.mem_id
     order by sum(price*amount) desc;
 
+USE market_db;
 -- ============ while ======================
 
 drop procedure if exists whileProc;
