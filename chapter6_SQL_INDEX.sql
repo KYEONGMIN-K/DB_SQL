@@ -1,3 +1,34 @@
+use market_db;
+
+create table table1(
+	col1 int primary key,
+    col2 int,
+    col3 int
+);
+
+show index from table1;
+
+drop table if exists buy, member;
+create table member(
+	mem_id char(8),
+    mem_name varchar(10),
+    mem_number int,
+    addr char(2)
+);
+
+INSERT INTO member VALUES('TWC', '트와이스', 9, '서울');
+INSERT INTO member VALUES('BLK', '블랙핑크', 4, '경남');
+INSERT INTO member VALUES('WMN', '여자친구', 6, '경기');
+INSERT INTO member VALUES('OMY', '오마이걸', 7, '서울');
+
+select * from member;
+
+-- 아래 ALTER를 적용하는 순간 PRIMARY KEY는 정렬된다.
+alter table member
+	add constraint
+    primary key (mem_id);
+    
+-- ========================== RESET =======================================
 DROP DATABASE IF EXISTS market_db; -- 만약 market_db가 존재하면 우선 삭제한다.
 CREATE DATABASE market_db;
 
@@ -49,78 +80,42 @@ INSERT INTO buy VALUES(NULL, 'MMU', '지갑', NULL, 30, 4);
 SELECT * FROM member;
 SELECT * FROM buy;
 
-CREATE VIEW v_member
-as 
-	select mem_id, mem_name, addr from member;
+SHOW INDEX FROM buy;
+-- =============   INDEX CHAPTER 6   ===============
+
+SHOW TABLE STATUS LIKE 'MEMBER';
+
+
+
+CREATE INDEX idx_member_addr 
+	on member(addr);
+
+show index from member;
+
+DROP INDEX idx_member_addr on member;
+
+analyze table member;
+show table status like 'member';
+
+-- 실행 안됨. 이미 4라는 데이터가 중복된 상태
+create unique index idx_member_mem_number
+	on member (mem_number);
     
-select * from v_member;
-
-select mem_name, addr from v_member
-	where addr in ('서울', '경기');
+create unique index idx_member_mem_name
+	on member (mem_name);
     
-select B.mem_id, M.mem_name, B.prod_name, M.addr,
-	CONCAT(M.phone1, M.phone2) '연락처'
-    from buy B
-		INNER JOIN member M
-        on B.mem_id = M.mem_id;
-        
-create view v_memberbuy
-as        
-	select B.mem_id, M.mem_name, B.prod_name, M.addr,
-		CONCAT(M.phone1, M.phone2) '연락처'
-		from buy B
-			INNER JOIN member M
-			on B.mem_id = M.mem_id;
-            
-select * from v_memberbuy where mem_name = '블랙핑크';
+show index from member;
+-- 실행 안됨. 이미 중복된 데이터가 존재
+insert into member values('moo', '마마무', 2, '태국', '001', '12341234', 155, '2020.10.10');
 
-use market_db;
-drop view if exists v_viewtest1;
-create view v_viewtest1
-as
-	select B.mem_id 'Member ID', M.mem_name AS 'Member Name',
-    B.prod_name 'Product Name',
-				concat(M.phone1, M.phone2) as 'office Phone'
-	from buy B
-		inner join member M
-        ON B.mem_id = M.mem_id;
-
-select distinct `Member ID`, `Member Name` from v_viewtest1;
-
-alter view v_viewtest1
-as
-	select B.mem_id '회원 아이디', M.mem_name AS '회원 이름',
-    B.prod_name '제품 이름',
-				concat(M.phone1, M.phone2) as '연락처'
-	from buy B
-		inner join member M
-        ON B.mem_id = M.mem_id;
-
-select distinct `회원 아이디`, `회원 이름` from v_viewtest1;
-
-desc v_viewtest1;
-
-update v_member set addr = '부산' where mem_id='BLK';
-
-SELECT * FROM V_MEMBER;
-
-create view v_height167
-as
-	select * from member where height >= 167;
+select mem_id, mem_name, addr
+	from member
+    where mem_name='에이핑크';
     
-select * from v_height167;
-SELECT * FROM member;
-delete from v_height167 where height < 167;
-delete from member where mem_id='TRA';
+create index idx_member_mem_number
+	on member (mem_number);
+analyze table member;
 
-alter view v_height167
-as 
-	select * from member where height>=167
-    with check option;
-    
-    
-drop view v_height167;
-insert into v_height167 values('TRA', '티아라', 6, '서울', NULL, NULL, 159, '2005-01-01');
-
-DELETE FROM member WHERE mem_id='TOB';    
-insert into v_height167 values('TOB', '텔레토비', 4, '영국', NULL, NULL, 140, '1995-01-01');
+select mem_name, mem_number
+	from member
+    where mem_number >= 7;
