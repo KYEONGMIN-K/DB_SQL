@@ -80,4 +80,63 @@ select p_maker '제조업체' from product
 -- 예제 7-17
 select p_name, p_price+500 '제품단가' from product;    
     
+-- 예제 7-18
+select p_name, p_stock, p_price
+	from product
+    where p_maker='한빛제과';
+
+-- 예제 7-19
+select o_product, o_stock, o_date
+	from orderTable
+    where o_member='apple' and o_stock>=15;
+    
+select o_product, o_stock, o_date, o_member
+	from orderTable
+	where o_member='apple' or o_stock>=15;
+
+select p_name, p_price, p_maker
+	from product
+    where p_price between 2000 and 3000;
+
+-- ============== insert ====================
+
+insert into member(m_id, m_name, m_age, m_grade, m_job, m_point) values('strawberry', '최유경', 30, 'vip', '공무원', 100);
+
+select * from member;
+
+insert into member(m_id, m_name, m_age, m_grade, m_point) values('tomato', '정은심', 36, 'gold', 4000);
+
+-- =============== update ================
+update product 
+	set p_name='통큰파이'
+    where p_id='p03';
+    
+update product
+	set p_price = p_price * 1.1;
+
+select * from product;
+
+update orderTable
+	set o_stock=5
+    where o_member in (select m_id
+						from member
+						where m_name='정소화');
+    
+select * from orderTable;
+
+-- ========= delete ================
+
+delete from orderTable
+	where o_date='2019-05-22';
+
+select * from orderTable;
+
+delete from orderTable
+	where o_member in (select m_id
+							from member
+							where m_name='정소화');
+                            
+select * from orderTable;
+
+delete from orderTable;
 
