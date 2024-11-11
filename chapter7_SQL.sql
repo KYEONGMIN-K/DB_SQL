@@ -189,3 +189,79 @@ end $$
 delimiter ;
 
 call cursor_proc();
+
+-- ============ 트리거  =============
+
+use market_db;
+create table if not exists trigger_table(id INT, txt varchar(10));
+insert into trigger_table values(1,'레드벨벳');
+insert into trigger_table values(2,'잇지');
+insert into trigger_table values(3,'블랙핑크');
+
+-- ========== trigger 문법 ============
+delimiter $$
+create trigger myTrigger
+	after delete
+	on trigger_table
+    for each row
+begin
+	set @msg = '가수 그룹이 삭제됨' ;
+end $$
+delimiter ;
+
+
+-- ========== after delete로 설정 되어 있기때문에 delete 후에만 트리거가 작동한다. ============
+set @msg = '';
+insert into trigger_table values(4,'마마무');
+select @msg;
+update trigger_table set txt = '블핑' where id=3;
+select @msg;
+
+delete from trigger_table where id=4;
+select @msg;
+
+select * from trigger_table;
+
+drop table singer;
+create table singer (select mem_id, mem_name, mem_number, addr from member);
+drop table backup_singer;
+create table backup_singer(
+	mem_id char(8) not null,
+    mem_name varchar(10) not null,
+    mem_number int not null,
+    addr char(2) not null,
+    modType char(2),
+    modDate DATE,
+    modUser varchar(30)
+);
+
+-- ============= trigger update =============
+delimiter $$
+create trigger singer_updateTrg
+	after update
+    on singer
+    for each row
+begin
+	insert into backup_singer values(old.mem_id, old.mem_name, old.mem_number, old.addr, '수정', curdate(), current_user());
+end $$
+delimiter ;
+
+delimiter $$
+create trigger singer_deleteTrg
+	after delete
+    on singer
+    for each row
+begin
+	insert into backup_singer values(old.mem_id, old.mem_name, old.mem_number, old.addr, '삭제', curdate(), current_user());
+end $$
+delimiter ;
+
+update singer set addr ='영국' where mem_id='BLK';
+delete from singer where mem_number >= 7;
+
+select * from singer;
+select * from backup_singer;
+
+-- truncate 는 delete가 아니라 로그가 남지 않는다. delete로 설정된 트리거는 오직 delete만 작동
+truncate table singer;
+
